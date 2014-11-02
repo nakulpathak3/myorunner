@@ -1,84 +1,83 @@
-scriptId = 'com.enghack.myfirstscript'
+scriptId = "com.MyFirstScript"
+
+position = 0
 
 function onForegroundWindowChange(app, title)
-    myo.debug("onForegroundWindowChange: " .. app .. ", " .. title)
-    return true
+	if (title == "Myo Runaway") then
+		return true
+	end
 end
 
 function onActiveChange(isActive)
-    myo.debug("Mouse in my control")
-    myo.controlMouse(true)
-    myo.debug("Get roll: " .. myo.getRoll())
-    myo.debug("Get X: " .. myo.getXDirection())
+	myo.controlMouse(true)
+	xStart = myo.getRoll()
 end
 
---[[function onPeriodic()
-	yaw_current = myo.getYaw()
-	yaw_diff = yaw_current - yaw_initial
-	myo.debug("Now yaw = " .. yaw_current)
-	if( yaw_diff > 0.7 ) then 
-		myo.keyboard("left_arrow", "press")
+
+function onPeriodic()
+	xRoll = myo.getRoll()
+	changeInX = xRoll - xStart
+	if (changeInX < -0.1) then
+		if (not(position == -1)) then
+			position = -1
+			myo.keyboard("a", "press")
+		end
+	elseif (changeInX > 0.1) then
+		if (not(position == 1)) then
+			position = 1
+			myo.keyboard("d", "press")
+		end
+	elseif (changeInX > -0.05 and changeInX < 0.05) then
+		if (position == -1) then
+			myo.keyboard("d", "press")
+		elseif (position == 1) then
+			myo.keyboard("a", "press")
+		end
+		position = 0
 	end
-	if( yaw_diff < 0.7 and yaw_diff > 0) then
-		myo.keyboard("right_arrow", "press")
-	end
-	if( yaw_diff < -0.6) then
-		myo.keyboard("left_arrow", "press")
-	end
-	if( yaw_diff > -0.6 and yaw_diff < 0) then
-		myo.keyboard("right_arrow", "press")
-	end
-end
---]]
+end	
 
 function onPoseEdge(pose, edge)
-	myo.debug("onPoseEdge: " .. pose .. ": " .. edge)
 
 	pose = conditionallySwapWave(pose)
-	
+
 	if (edge == "on") then
 		if (pose == "waveOut") then
-			onWaveOut()		
+			onWaveOut()
 		elseif (pose == "waveIn") then
 			onWaveIn()
 		elseif (pose == "fist") then
 			onFist()
-			myo.mouse("left", "click")
-			yaw_initial = myo.getYaw()
-			myo.debug("Yaw = " .. yaw_initial)
 		elseif (pose == "fingersSpread") then
-			onFingersSpread()			
+			onFingersSpread()
 		end
 	end
 end
 
 function onWaveOut()
-	myo.debug("Right")
-	myo.keyboard("z", "press")
+	myo.keyboard("right_arrow", "press")
 end
 
 function onWaveIn()
-	myo.debug("Left")	
-	myo.keyboard("x","press")
+	myo.keyboard("left_arrow", "press")
 end
- 
+
 function onFist()
-	myo.debug("Duck")	
-	myo.keyboard("down_arrow","press")
+	myo.mouse("left", "click")
 end
- 
+
 function onFingersSpread()
-	myo.debug("Jump")
 	myo.keyboard("up_arrow", "press")
 end
 
 function conditionallySwapWave(pose)
-	if myo.getArm() == "left" then
-        if pose == "waveIn" then
+	if (myo.getArm() == "left") then
+		if (pose == "waveIn") then
             pose = "waveOut"
-        elseif pose == "waveOut" then
+        elseif (pose == "waveOut") then
             pose = "waveIn"
         end
     end
     return pose
 end
+
