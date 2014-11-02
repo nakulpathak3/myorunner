@@ -1,36 +1,35 @@
 scriptId = 'com.enghack.myfirstscript'
 
-locked = true
+function onForegroundWindowChange(app, title)
+    myo.debug("onForegroundWindowChange: " .. app .. ", " .. title)
+    return true
+end
 
 function onActiveChange(isActive)
     myo.debug("Mouse in my control")
     myo.controlMouse(true)
-    yawAndClick()
+    myo.debug("Get roll: " .. myo.getRoll())
+    myo.debug("Get X: " .. myo.getXDirection())
 end
 
-function onPeriodic()
+--[[function onPeriodic()
 	yaw_current = myo.getYaw()
-	myo.debug("Now yaw = " .. yaw_current);
-end
-
-function toggleLock()
-	locked = not locked
-	myo.vibrate("short")
-	if (not locked) then
-		-- Vibrate twice on unlock
-		myo.debug("Unlocked")
-		myo.vibrate("short")
-	else 
-		myo.debug("Locked")
+	yaw_diff = yaw_current - yaw_initial
+	myo.debug("Now yaw = " .. yaw_current)
+	if( yaw_diff > 0.7 ) then 
+		myo.keyboard("left_arrow", "press")
+	end
+	if( yaw_diff < 0.7 and yaw_diff > 0) then
+		myo.keyboard("right_arrow", "press")
+	end
+	if( yaw_diff < -0.6) then
+		myo.keyboard("left_arrow", "press")
+	end
+	if( yaw_diff > -0.6 and yaw_diff < 0) then
+		myo.keyboard("right_arrow", "press")
 	end
 end
-
-function onForegroundWindowChange(app, title)
-    if title == "Temple Run Online - Play this Game at Plonga.com" then
-    	myo.debug("onForegroundWindowChange: " .. app .. ", " .. title)
-    	return true
-    end
-end
+--]]
 
 function onPoseEdge(pose, edge)
 	myo.debug("onPoseEdge: " .. pose .. ": " .. edge)
@@ -44,24 +43,23 @@ function onPoseEdge(pose, edge)
 			onWaveIn()
 		elseif (pose == "fist") then
 			onFist()
-		elseif (pose == "fingersSpread") then
-			onFingersSpread()			
-		elseif (pose == "thumbToPinky") then
 			myo.mouse("left", "click")
 			yaw_initial = myo.getYaw()
-			myo.debug("Yaw = " .. yaw_initial)	
+			myo.debug("Yaw = " .. yaw_initial)
+		elseif (pose == "fingersSpread") then
+			onFingersSpread()			
 		end
 	end
 end
 
 function onWaveOut()
 	myo.debug("Right")
-	myo.keyboard("right_arrow", "press")
+	myo.keyboard("z", "press")
 end
 
 function onWaveIn()
 	myo.debug("Left")	
-	myo.keyboard("left_arrow","press")
+	myo.keyboard("x","press")
 end
  
 function onFist()
@@ -84,4 +82,3 @@ function conditionallySwapWave(pose)
     end
     return pose
 end
---]]
